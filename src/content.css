@@ -1,0 +1,7 @@
+/* Visual feedback when a field is filled */
+.iff-filled {
+  outline: 2px solid #2cb67d !important;
+  outline-offset: 1px;
+  background-color: rgba(44, 182, 125, 0.06) !important;
+  transition: outline-color 0.3s ease, background-color 0.3s ease;
+}

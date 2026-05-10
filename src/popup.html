@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=380">
+  <title>Intelligent Form Filler</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-deep: #16161a;
+      --bg-card: #242629;
+      --headline: #fffffe;
+      --paragraph: #94a1b2;
+      --accent: #7f5af0;
+      --accent-hover: #6b46e0;
+      --tertiary: #2cb67d;
+      --tertiary-hover: #24a06d;
+      --secondary: #72757e;
+      --stroke: #010101;
+    }
+
+    body {
+      width: 360px;
+      font-family: 'Segoe UI', -apple-system, sans-serif;
+      background: var(--bg-deep);
+      color: var(--paragraph);
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      padding: 20px 20px 16px;
+      background: var(--bg-card);
+      border-bottom: 1px solid rgba(127, 90, 240, 0.15);
+    }
+
+    .header h1 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--headline);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header h1 .icon {
+      width: 22px; height: 22px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .header p {
+      font-size: 12px;
+      color: var(--secondary);
+      margin-top: 4px;
+    }
+
+    /* ── Body ── */
+    .body { padding: 16px 20px 20px; }
+
+    .field { margin-bottom: 14px; }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--secondary);
+      margin-bottom: 6px;
+    }
+
+    .field select,
+    .field input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid rgba(114, 117, 126, 0.25);
+      border-radius: 8px;
+      background: var(--bg-deep);
+      color: var(--headline);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field select:focus,
+    .field input:focus {
+      border-color: var(--accent);
+    }
+
+    .field input[type="password"] {
+      font-family: monospace;
+      letter-spacing: 1px;
+    }
+
+    .api-key-wrapper { position: relative; }
+
+    .toggle-visibility {
+      position: absolute;
+      right: 10px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: var(--secondary); cursor: pointer;
+      font-size: 13px; padding: 4px;
+    }
+
+    .toggle-visibility:hover { color: var(--paragraph); }
+
+    .hint {
+      font-size: 11px;
+      color: var(--secondary);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 18px 0 14px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(114, 117, 126, 0.25);
+    }
+
+    .divider span {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--secondary);
+      white-space: nowrap;
+    }
+
+    /* ── Buttons ── */
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--headline);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .btn-primary:disabled {
+      background: rgba(127, 90, 240, 0.15);
+      color: rgba(127, 90, 240, 0.4);
+      cursor: not-allowed;
+    }
+
+    .btn-faker {
+      background: var(--tertiary);
+      color: var(--headline);
+    }
+
+    .btn-faker:hover:not(:disabled) {
+      background: var(--tertiary-hover);
+    }
+
+    .btn-faker:disabled {
+      background: rgba(44, 182, 125, 0.15);
+      color: rgba(44, 182, 125, 0.4);
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--paragraph);
+      border: 1px solid rgba(114, 117, 126, 0.25);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(114, 117, 126, 0.1);
+      color: var(--headline);
+    }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .badge-ai {
+      background: rgba(127, 90, 240, 0.2);
+      color: var(--accent);
+    }
+
+    .badge-fast {
+      background: rgba(44, 182, 125, 0.2);
+      color: var(--tertiary);
+    }
+
+    /* ── Status ── */
+    .status {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      display: none;
+    }
+
+    .status.success {
+      display: block;
+      background: rgba(44, 182, 125, 0.1);
+      color: var(--tertiary);
+      border: 1px solid rgba(44, 182, 125, 0.2);
+    }
+
+    .status.error {
+      display: block;
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .status.loading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(127, 90, 240, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(127, 90, 240, 0.2);
+    }
+
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(127, 90, 240, 0.3);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .field-count {
+      font-size: 12px;
+      color: var(--secondary);
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    .footer-hint {
+      font-size: 11px;
+      color: var(--secondary);
+      margin-top: 14px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .footer-hint strong {
+      color: var(--paragraph);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><span class="icon">⚡</span> Intelligent Form Filler</h1>
+    <p>AI-powered or instant fake data for any form</p>
+  </div>
+
+  <div class="body">
+    <div class="field">
+      <label>AI Provider</label>
+      <select id="provider">
+        <option value="anthropic">Anthropic (Claude Sonnet 4)</option>
+        <option value="openai">OpenAI (GPT-4o-mini)</option>
+        <option value="gemini">Google (Gemini 2.0 Flash)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>API Key</label>
+      <div class="api-key-wrapper">
+        <input type="password" id="apiKey" placeholder="sk-ant-... / sk-... / AIza...">
+        <button class="toggle-visibility" id="toggleKey" type="button">👁</button>
+      </div>
+      <div class="hint">Required for AI mode only. Faker works offline.</div>
+    </div>
+
+    <div class="field">
+      <label>Locale</label>
+      <select id="locale">
+        <option value="pt-BR">Português (Brasil)</option>
+        <option value="en-US">English (US)</option>
+        <option value="en-GB">English (UK)</option>
+        <option value="es-ES">Español</option>
+        <option value="fr-FR">Français</option>
+        <option value="de-DE">Deutsch</option>
+        <option value="ja-JP">日本語</option>
+      </select>
+    </div>
+
+    <button class="btn btn-secondary" id="saveBtn">💾 Save Settings</button>
+
+    <div class="divider"><span>Fill Mode</span></div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="fillAiBtn" disabled>
+        <span class="badge badge-ai">AI</span>
+        <span id="fillAiBtnText">⚡ Fill with AI</span>
+      </button>
+
+      <button class="btn btn-faker" id="fillFakerBtn" disabled>
+        <span class="badge badge-fast">FAST</span>
+        🎲 Fill with Faker
+      </button>
+    </div>
+
+    <div class="status" id="status"></div>
+    <div class="field-count" id="fieldCount"></div>
+
+    <div class="footer-hint">
+      <strong>AI</strong> understands context &amp; generates coherent data<br>
+      <strong>Faker</strong> is instant, offline, with valid CPF/CNPJ
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
